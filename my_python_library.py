@@ -228,16 +228,23 @@ class LibraryApp:
     def load_from_file(filename):
         with open(filename, "r") as file:
             reader = csv.reader(file)
-            next(reader)  # Skip library name
-            library_name = next(reader)[1]
+            first_row = next(reader)  # The first row contains "Library Name, <name>"
+            if first_row[0] == "Library Name":
+                library_name = first_row[1]  # Extract library name correctly
+            else:
+                raise ValueError("Invalid library file format. Library Name not found.")
+
             library = Library(library_name)
 
+            # Skip the header row and read the books
+            next(reader)  # Skip the column headers: ["Book Name", "Author", "Year", "Theme", "Photo"]
             for row in reader:
-                if row:
+                if row:  # Ensure the row isn't empty
                     name, author, year, theme, photo = row
                     library.add_book(Book(name, author, year, theme, photo or None))
 
         return library
+
 
     def exit_app(self):
         self.root.quit()
